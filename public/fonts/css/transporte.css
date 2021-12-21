@@ -1,0 +1,317 @@
+.input-group
+{
+	width: 100%;
+}
+
+.form-control-input
+{
+	padding-top: 5px !important;
+	padding-bottom: 5px !important;
+}
+
+.foto_carga .marco 
+{
+	width: 100%;
+	height: 89%;
+	
+}
+
+.foto_carga img
+{
+	width: 50%;
+    margin-left: 25%;
+    height: 61%;
+    margin-top: 10%;
+    opacity: 0.2;
+
+}
+
+.img_donwload
+{
+	opacity : 1 !important;
+	margin-left: 0px !important;
+	margin-top: 0px !important;
+	width: 100% !important;
+	height: 100% !important;
+}
+
+.foto_carga:nth-child(3) img
+{
+	width: 40%;
+    margin-left: 29%;
+}
+
+.foto_carga:nth-child(4) img
+{
+	width: 40%;
+    height: 44%;
+    margin-top: 15%;
+    margin-left: 29%;
+}
+
+.tab-pane
+{
+	padding-bottom: 50px;
+	margin-bottom: 50px;
+}
+
+.list-inline.pull-right
+{
+	position: relative;
+	top:8px;
+}
+
+.disabled .round-tab
+{
+	background:rgb(222, 222, 222);
+}
+
+.table_center td,.table_center th
+{
+	text-align: center;
+}
+
+.input_datos input
+{
+	font-weight: bold;
+}
+
+.table_center.odometer
+{
+	width: 30% !important;
+	margin-left: 35%;
+}
+
+
+
+.form-group
+{
+	padding-bottom: 0px !important;
+	margin-bottom: 5px;
+}
+
+/*RADIO BUTTON*/
+/* ----- ----- ----- ----- */
+.formulario {
+  /* --------------------------------------- */
+  /* ----- Radio Button */
+  /* --------------------------------------- */
+  /* --------------------------------------- */
+  /* ----- Checkbox */
+  /* --------------------------------------- */
+}
+
+.formulario > div {
+  padding: 20px 0;
+  border-bottom: 1px solid #ccc;
+}
+
+.formulario label {
+  display: inline-block;
+  cursor: pointer;
+  color: #084A9E;
+  position: relative;
+  padding: 5px 15px 5px 51px;
+  font-size: 1em;
+  border-radius: 5px;
+  -webkit-transition: all 0.3s ease;
+  -o-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+}
+.formulario label:hover {
+  background: rgba(0, 116, 217, 0.1);
+}
+.formulario label:before {
+  content: "";
+  display: inline-block;
+  width: 17px;
+  height: 17px;
+  position: absolute;
+  left: 15px;
+  border-radius: 50%;
+  background: none;
+  border: 3px solid #084A9E;
+}
+.formulario input[type="radio"] {
+  display: none;
+}
+.formulario input[type="radio"]:checked + label:before {
+  display: none;
+}
+.formulario input[type="radio"]:checked + label {
+  padding: 5px 15px;
+  background: #084A9E;
+  border-radius: 2px;
+  color: #fff;
+}
+.formulario .checkbox label:before {
+  border-radius: 3px;
+}
+.formulario .checkbox input[type="checkbox"] {
+  display: none;
+}
+.formulario .checkbox input[type="checkbox"]:checked + label:before {
+  display: none;
+}
+.formulario .checkbox input[type="checkbox"]:checked + label {
+  background: #084A9E;
+  color: #fff;
+  padding: 5px 15px;
+}
+
+/*GOOGLE MAPS*/
+.panel-asignacion
+{
+  border: 1px solid #b9b9b9;
+    width: 120%;
+    position: relative;
+    left: -16%;
+    height: 65%;
+    top: 5px;
+    border-radius: 5px;
+}
+
+.panel-asignacion p 
+{
+  text-align: center;
+  color:#585757;
+  font-weight: bold;
+}
+
+.panel-asignacion .texto-title
+{
+  text-align: left;
+  font-weight: normal;
+  margin-left: 5px;
+}
+
+.panel-asignacion input, .panel-asignacion select
+{
+  width: 94%;
+  margin-left: 3%;
+}
+
+.panel-asignacion .btn-maps
+{
+    margin-top: 12px;
+    margin-left: 20%;
+}
+
+.convenciones-incidencia
+{
+  border: 1px solid #b9b9b9;
+    width: 120%;
+    position: relative;
+    left: -16%;
+    height: 92px;
+    top: 5px;
+    border-radius: 5px;
+} 
+
+.convenciones-incidencia p 
+{
+  text-align: center;
+  color:#585757;
+  font-weight: bold;
+}
+
+.firstHeading
+{
+  font-size: 18px;
+
+}
+/*FIN GOOGLE MAPS*/
+
+/*INCIDENCIAS*/
+
+#panel_novedades
+    {
+      border:1px solid #ccc;
+      border-radius: 2px;
+    }
+
+    .novedad_user
+    {
+      box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.75);
+      height: auto;
+      padding: 3px;
+      width: 98%;
+      margin-left: 1%;
+      margin-bottom: 8px;
+      border-radius: 6px;
+    }
+
+    .novedad_user .date
+    {
+      font-style: italic;
+      color: #888484;
+      margin-bottom: 2px;
+    }
+
+    .date i,.user i,.content i
+    {
+      margin-right: 6px;
+    }
+
+    .novedad_user .user
+    {
+      font-style: italic;
+      color: #888484;
+      margin-bottom: 2px;
+    }
+    
+    .novedad_user .content
+    {
+      color: #888484;
+      margin-bottom: 2px;
+    }
+
+    .convenciones
+    {
+      position: fixed;
+      right: 0px;
+      top: 61px;
+      height: 86%;
+      background: white;
+      width: 220px;
+      z-index: 10;
+    }
+
+    .convenciones li
+    {
+      list-style-type: none;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .convenciones img
+    {
+      margin-left: 2px;
+      margin-top: 3px;
+    }
+
+    .convenciones p
+    {
+      display: inline-block;
+    }
+
+    .convenciones fieldset
+    {
+      border: 1px solid #ccc;
+          margin-bottom: 13px;
+    }
+
+    .convenciones legend
+    {
+      font-size:13px;
+      margin-bottom: 2px;
+      width: 33%;
+      border: 0px;
+    }
+
+    .scroll
+    {
+      overflow-y: auto;
+      height: 100%;
+    }
+
+  /*FIN INCIDENCIAS*/

@@ -1,0 +1,23 @@
+.contenedorinputs{
+	width: 100%;
+	max-width: 993px;
+	margin: 0 auto;
+}
+.dv-clear{
+	width:100%;
+	clear:both;
+}
+
+.loading{
+    display:none;
+}
+.mensaje-validacion{
+	color:#B94A48;
+}
+.contenedorinputs .dataTables_wrapper .col-sm-12{
+	max-width: 100% !important;
+	overflow-x: auto;
+}
+.theadtt td{
+	 height: 31px !important;
+}   

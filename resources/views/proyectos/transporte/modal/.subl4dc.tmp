@@ -1,0 +1,102 @@
+<div class="modal fade" id="modal_incidencias">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header modal-filter panel-warning">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h5 class="modal-title">Incidencias</h5>
+
+            </div>
+            <div class="modal-body">
+                <div class="row" style="margin-top:5px;">
+                    <div class="form-group has-feedback">
+                        <label for="id_incidencia">Incidencia:</label>
+                        <input name="id_incidencia" type="text" readonly class="form-control" id="id_incidencia"  />
+                    </div>
+                </div>
+                <div class="row" style="margin-top:5px;">
+                    <div class="form-group has-feedback">
+                        <label for="id_tipo_incidencia">Tipo de incidencia:</label>
+                        <select name="id_tipo_incidencia" type="text" readonly class="form-control" id="id_tipo_incidencia" >
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:5px;">
+                    <div class="form-group has-feedback">
+                        <label for="txt_observacion">Observación:</label>
+                        <textarea name="txt_observacion" type="text" readonly class="form-control" id="txt_observacion" style="height:100px;resize:none"></textarea>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:5px;">
+                    <div class="form-group has-feedback">
+                        <label for="id_incidencia">Fecha y hora de generación:</label>
+                        <input name="id_incidencia" type="text" readonly class="form-control" id="id_incidencia"  />
+                    </div>
+                </div>
+
+                <p style="margin-top:5px;"><b>Árbol de decisión</b></p>
+
+                <div class="row" style="margin-top:5px;">
+                    <div class="form-group has-feedback">
+                        <label for="id_incidencia">Tipo de novedad reportada:</label>
+                        <select name="id_incidencia" type="text" class="form-control" id="id_incidencia" >
+                        <option value="0">Seleccione</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:5px;">
+                    <div class="form-group has-feedback">
+                        <label for="id_incidencia">Componente:</label>
+                        <select name="id_incidencia" type="text" class="form-control" id="id_incidencia" >
+                        <option value="0">Seleccione</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:5px;">
+                    <div class="form-group has-feedback">
+                        <label for="id_incidencia">Tipo de falla:</label>
+                        <select name="id_incidencia" type="text" class="form-control" id="id_incidencia" >
+                        <option value="0">Seleccione</option>
+                        </select>
+                    </div>
+                </div>
+
+
+                <div class="row" style="margin-top:5px;">
+                    <div class="form-group has-feedback">
+                        <label for="id_incidencia">Inhabilitar vehículo:</label>
+                        <input name="id_incidencia" type="checkbox"  id="id_incidencia" style="    width: 21px;    height: 17px;    margin-left: 10px;"/>
+
+                        <label for="id_incidencia">Tiempo estimado:</label>
+                        <input name="id_incidencia" type="text"  id="id_incidencia"/>
+                    </div>
+                </div>
+
+
+                <div class="row" style="margin-top:5px;">
+                    <div class="form-group has-feedback">
+                        <button class="btn btn-primary  btn-cam-trans btn-sm" style=" margin-left: 12px;;padding:17px !important;width: 32%;">Asistencia en sitio</button>
+                        <button class="btn btn-primary  btn-cam-trans btn-sm" style="padding:17px !important;width: 32%;">Desplazamiento al taller sin grúa</button>
+                        <button class="btn btn-primary  btn-cam-trans btn-sm" style="padding:17px !important;width: 32%;"> Desplazamiento de vehículo a la sede</button>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:5px;">
+                    <div class="form-group has-feedback">
+                        <label for="id_incidencia">Tipo de falla:</label>
+                        <select name="id_incidencia" type="text" class="form-control" id="id_incidencia" >
+                        <option value="0">Seleccione</option>
+                        </select>
+                    </div>
+                </div>
+                
+
+            </div>
+        </div>
+    </div>
+</div>

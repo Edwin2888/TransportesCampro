@@ -1,0 +1,603 @@
+@charset "UTF-8";
+/*VARIABLES*/
+/*FUNCIONES*/
+/*Reglas Generales*/
+html, body {
+  width: 100%;
+  height: 100%; }
+
+.one.column, .two.columns, .two.columns, .four.columns, .third.columns, .five.columns, .six.columns, .seven.columns
+, .eight.columns, .nine.columns, .ten.columns, .eleven.columns, .twelve.columns {
+  padding: 0px;
+  margin: 0px; }
+
+.container {
+  padding: 0px;
+  margin: 0px;
+  width: 100%;
+  max-width: 100%; }
+  .container .row {
+    width: 100%; }
+
+/*LOGIN*/
+#login {
+  width: 97%;
+  height: 100%;
+  margin: 0 auto; }
+  #login img {
+    width: 250px;
+    margin-top: 40px; }
+  #login input {
+    height: 60px; }
+  #login button {
+    width: 90%;
+    margin-top: 40px;
+    position: relative;
+    margin-left: 5%; }
+  #login .icon_text {
+    width: 100%;
+    position: relative;
+    top: -40px; }
+    #login .icon_text span {
+      position: relative;
+      top: 50px;
+      left: 10px; }
+    #login .icon_text input {
+      width: 100%;
+      text-indent: 50px; }
+
+/*FIN LOGIN*/
+/*EMERGENCIAS*/
+.header_emergencia {
+  width: 100%;
+  background-color: white;
+  position: fixed;
+  z-index: 5; }
+
+.emergencias_actividades {
+  margin-top: 80px;
+  width: 100%; }
+  .emergencias_actividades ul .list__header {
+    padding-top: 5px;
+    padding-left: 5px;
+    margin-bottom: 0px;
+    text-align: center; }
+  .emergencias_actividades ul .list__item {
+    margin-top: 0px;
+    font-size: 12px; }
+    .emergencias_actividades ul .list__item ul {
+      list-style-type: none;
+      width: 100%;
+      margin-left: 2px;
+      margin-top: 2px; }
+  .emergencias_actividades ul .columna1 {
+    display: inline-block;
+    width: 35%;
+    font-size: 14px; }
+
+.nombre_user {
+  width: 100%;
+  height: 30px;
+  text-align: center;
+  background-color: #c6ff00;
+  color: black; }
+
+.menu_opciones {
+  position: absolute;
+  margin-top: 50px;
+  right: 230px;
+  z-index: 20; }
+
+.item_lista {
+  margin-bottom: 8px; }
+  .item_lista ul {
+    margin: 0px; }
+    .item_lista ul li {
+      margin-bottom: 3px; }
+
+.asignado .list__header {
+  background-color: #0277bd; }
+
+
+.pendiente .list__header {
+  background-color: #ff9900; }
+
+.terminado .list__header {
+  background-color: #00e676; }
+
+.item_lista:hover {
+  opacity: 0.8; }
+
+.list {
+  border: 0px !important; }
+
+/*EMERGENCIAS*/
+/*IRO*/
+#tbl_equipo_trabajo table, #tbl_equipo_trabajo2 table {
+  width: 100%;
+  border-collapse: collapse; }
+  #tbl_equipo_trabajo table th, #tbl_equipo_trabajo2 table th {
+    background-color: #4CAF50;
+    color: white;
+    padding: 15px; }
+  #tbl_equipo_trabajo table td, #tbl_equipo_trabajo2 table td {
+    text-align: center;
+    padding: 15px; }
+  #tbl_equipo_trabajo table tr:nth-child(even), #tbl_equipo_trabajo2 table tr:nth-child(even) {
+    background-color: #f2f2f2; }
+  #tbl_equipo_trabajo table th:nth-child(1), #tbl_equipo_trabajo table th:nth-child(2), #tbl_equipo_trabajo table th:nth-child(3), #tbl_equipo_trabajo2 table th:nth-child(1), #tbl_equipo_trabajo2 table th:nth-child(2), #tbl_equipo_trabajo2 table th:nth-child(3) {
+    width: 33%; }
+
+#alert_firma_personas .alert-dialog-mask, #alert_firma_personas2 .alert-dialog-mask {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index: 9; }
+#alert_firma_personas .alert-dialog, #alert_firma_personas2 .alert-dialog {
+  width: 96%;
+  height: 96%;
+  position: absolute;
+  z-index: 9; }
+#alert_firma_personas .alert-dialog-content, #alert_firma_personas2 .alert-dialog-content {
+  height: 85%;
+  overflow: auto; }
+  #alert_firma_personas .alert-dialog-content .elementos_modal, #alert_firma_personas2 .alert-dialog-content .elementos_modal {
+    width: 95%; }
+    #alert_firma_personas .alert-dialog-content .elementos_modal b, #alert_firma_personas2 .alert-dialog-content .elementos_modal b {
+      display: inline-block;
+      width: 95%;
+      margin-top: 10px;
+      margin-bottom: 5px; }
+    #alert_firma_personas .alert-dialog-content .elementos_modal input, #alert_firma_personas2 .alert-dialog-content .elementos_modal input {
+      width: 98%;
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 7px; }
+#alert_firma_personas .alert-dialog-footer, #alert_firma_personas2 .alert-dialog-footer {
+  height: 5%; }
+
+#democanvas {
+  width: 300px;
+  height: 150px;
+  border-radius: 7px;
+  border: 1px solid #ccc; }
+
+/*RIESGOS IRO*/
+#seccion_Riesgos {
+  width: 100%; }
+  #seccion_Riesgos table {
+    width: 100%; }
+    #seccion_Riesgos table tr {
+      display: inline-block;
+      width: 100%; }
+      #seccion_Riesgos table tr td:nth-child(1) {
+        width: 10%;
+        padding: 0px; }
+      #seccion_Riesgos table tr td:nth-child(2) {
+        width: 90%;
+        padding-left: 0px; }
+      #seccion_Riesgos table tr input {
+        width: 25px;
+        height: 25px;
+        position: relative;
+        top: 8px; }
+      #seccion_Riesgos table tr label {
+        display: inline-block;
+        margin-left: 2px;
+        width: 87%; }
+  #seccion_Riesgos li:nth-child(1) {
+    border-top: 1px solid #ccc; }
+  #seccion_Riesgos li {
+    width: 100%;
+    list-style-type: none;
+    font-size: 16px;
+    border-bottom: 1px solid #ccc; }
+  #seccion_Riesgos .item-lista:hover, #seccion_Riesgos .item-lista:active, #seccion_Riesgos .item-lista:link {
+    background-color: #eee; }
+  #seccion_Riesgos .titulo {
+    background-color: #eee; }
+  #seccion_Riesgos .titulo-principal {
+    display: inline-block;
+    text-indent: 5px;
+    text-align: center; }
+  #seccion_Riesgos .num {
+    display: inline-block;
+    width: 30px;
+    text-indent: 5px;
+    vertical-align: middle;
+    padding: 10px 2px;
+    margin-top: 6px;
+    margin-left: 1px; }
+  #seccion_Riesgos .linea {
+    display: inline-block;
+    height: 45px;
+    border-right: 1px solid #ccc;
+    position: absolute; }
+  #seccion_Riesgos .tituloCont {
+    margin-left: 5px; }
+
+/*TABLA REVISI├ôN EPIS */
+#revisionEpis table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px; }
+  #revisionEpis table, #revisionEpis table td {
+    border: 1px solid #ddd;
+    text-align: left; }
+  #revisionEpis table tr td:nth-child(1) {
+    position: relative;
+    left: 4px; }
+  #revisionEpis table td {
+    padding: 4px; }
+    #revisionEpis table td input {
+      width: 30px;
+      height: 30px;
+      margin-top: 0px;
+      margin-right: 0px;
+      margin-left: 0px;
+      margin-bottom: 0px; }
+  #revisionEpis table th {
+    padding: 0px; }
+  #revisionEpis table th:nth-child(1), #revisionEpis table th:nth-child(3), #revisionEpis table th:nth-child(4), #revisionEpis table th:nth-child(5) {
+    width: 30px; }
+  #revisionEpis table .titulo {
+    background-color: #eee; }
+
+/*CHARLA 5 MINUTOS*/
+#seccion_charla textarea {
+  width: 97%;
+  height: 300px; }
+#seccion_charla #elementoAnalisis {
+  width: 97%;
+  height: 120px;
+  border: 1px solid black;
+  display: inline-block; }
+  #seccion_charla #elementoAnalisis #agregarAnalisis {
+    width: 10%;
+    display: inline-block;
+    height: 100%;
+    float: left; }
+  #seccion_charla #elementoAnalisis #agregarAnalisisRiesgo {
+    width: 89%;
+    display: inline-block;
+    height: 100%;
+    float: left; }
+  #seccion_charla #elementoAnalisis .analisisR {
+    display: block;
+    width: 150px;
+    height: 28px;
+    border: 1px solid #013D94;
+    float: left;
+    color: #EC6806; }
+    #seccion_charla #elementoAnalisis .analisisR div {
+      float: right;
+      margin-right: 5px; }
+
+#alert_medida_riesgo .alert-dialog-mask {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index: 9; }
+#alert_medida_riesgo .alert-dialog {
+  width: 96%;
+  height: 96%;
+  position: absolute;
+  z-index: 9; }
+#alert_medida_riesgo .alert-dialog-content {
+  height: 85%;
+  overflow: auto; }
+  #alert_medida_riesgo .alert-dialog-content ul {
+    list-style-type: none; }
+    #alert_medida_riesgo .alert-dialog-content ul li {
+      border-left: 1px solid black;
+      border-right: 1px solid black;
+      border-top: 1px solid black;
+      padding: 10px;
+      margin-bottom: 0px; }
+    #alert_medida_riesgo .alert-dialog-content ul li:nth-child(6) {
+      border-bottom: 1px solid black; }
+#alert_medida_riesgo .alert-dialog-footer {
+  height: 5%; }
+
+#contenido {
+  height: calc(100% - 100px);
+  overflow: auto; }
+
+footer {
+  width: 100%;
+  position: fixed;
+  height: 100px;
+  background-color: white; }
+  footer .alert-dialog-footer {
+        border-bottom: 1px solid #e0e1e6; }
+    footer .alert-dialog-footer .alert-dialog-button {
+      height: 100%; }
+  footer img {
+       width: 26%;
+    height: 52px;
+    margin-right: 3px; }
+
+#verFoto
+{
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    opacity: 1;
+    top: 0px;
+    left: 0px;
+    background-color: black;
+    overflow: auto;
+  }  
+#verFoto .closeVentana
+{
+  display: block;
+  color:#E7A61A;
+  font-size:15px;
+      position: fixed;
+    top: 0px;
+    right: 0px;
+    z-index: 100000;
+        margin-right: 9px;
+}
+#verFoto img
+{
+      width: 48%;
+    padding: 0.5%;
+        height: 141px;
+    border-radius: 7px;
+    box-shadow: 0px 0px 20px -6px rgba(255,255,255,1);
+}
+
+#verFotoIndi
+{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1001;
+    opacity: 1;
+    top: 0px;
+    left: 0px;
+    background-color: white;
+    overflow: hidden;
+}
+
+.clearfix {
+      *zoom: 1;
+    }
+
+
+  .the-icons {
+    font-size: 14px;
+    line-height: 24px;
+  }
+  .switch {
+    position: absolute;
+    right: 0;
+    bottom: 10px;
+    color: #666;
+  }
+  .switch input {
+    margin-right: 0.3em;
+  }
+  .codesOn .i-name {
+    display: none;
+  }
+  .codesOn .i-code {
+    display: inline;
+  }
+  .i-code {
+    display: none;
+  }
+    @font-face {
+      font-family: 'fontello';
+      src: url('./font/fontello.eot?20160217');
+      src: url('./font/fontello.eot?20160217#iefix') format('embedded-opentype'),
+           url('./font/fontello.woff?20160217') format('woff'),
+           url('./font/fontello.ttf?20160217') format('truetype'),
+           url('./font/fontello.svg?20160217#fontello') format('svg');
+      font-weight: normal;
+      font-style: normal;
+    }
+     
+     
+    .demo-icon
+    {
+      font-family: "fontello";
+      font-style: normal;
+      font-weight: normal;
+      speak: none;
+     
+      display: inline-block;
+      text-decoration: inherit;
+      width: 1em;
+      margin-right: .2em;
+      text-align: center;
+      /* opacity: .8; */
+     
+      /* For safety - reset parent styles, that can break glyph codes*/
+      font-variant: normal;
+      text-transform: none;
+     
+      /* fix buttons height, for twitter bootstrap */
+      line-height: 1em;
+     
+      /* Animation center compensation - margins should be symmetric */
+      /* remove if not needed */
+      margin-left: .2em;
+     
+      /* You can be more comfortable with increased icons size */
+      /* font-size: 120%; */
+     
+      /* Font smoothing. That was taken from TWBS */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+     
+      /* Uncomment for 3D effect */
+      /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
+    }
+
+.icon-photo
+{
+  display: inline-block;    width: 10%;    font-size: 46px;    position: relative;    top: -4px;left: 24px;
+}
+/*CSS CHECBOX]*/
+/*
+input[type=checkbox].css-checkbox {
+							position:absolute; z-index:-1000; left:-1000px; overflow: hidden; clip: rect(0 0 0 0); height:1px; width:1px; margin:-1px; padding:0; border:0;
+						}
+
+						input[type=checkbox].css-checkbox + label.css-label {
+							padding-left:29px;
+							height:20px; 
+							display:inline-block;
+							line-height:20px;
+							background-repeat:no-repeat;
+							background-position: 0 0;
+							font-size:15px;
+							vertical-align:middle;
+							cursor:pointer;
+
+						}
+
+						input[type=checkbox].css-checkbox:checked + label.css-label {
+							background-position: 0 -20px;
+						}
+						label.css-label {
+				background-image:url(../img/img.png);
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+				-khtml-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+			}
+.css-label
+{
+	width:70%;
+}*/
+/*CSS RADIO BUTTON*/
+/*
+input[type=radio].css-checkbox-a {
+							position:absolute; z-index:-1000; left:-1000px; overflow: hidden; clip: rect(0 0 0 0); height:1px; width:1px; margin:-1px; padding:0; border:0;
+						}
+
+						input[type=radio].css-checkbox-a + label.css-label-a {
+							padding-left:25px;
+							height:20px; 
+							display:inline-block;
+							line-height:20px;
+							background-repeat:no-repeat;
+							background-position: 0 0;
+							font-size:15px;
+							vertical-align:middle;
+							cursor:pointer;
+
+						}
+
+						input[type=radio].css-checkbox-a:checked + label.css-label-a {
+							background-position: 0 -20px;
+						}
+						label.css-label-a {
+				background-image:url(../img/img2.png);
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+				-khtml-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+			}
+*/
+/*FIN IRO*/
+
+/*# sourceMappingURL=index.css.map */
+
+.list__item
+{
+  border:1px solid gray !important;
+}
+
+.list__item li
+{
+  margin-bottom: 2px;
+}
+
+.col-md-11
+{
+  width: 97%;
+  display: inline-block;
+}
+
+.col-md-1
+{
+  width: 2%;
+  display: inline-block;
+}
+
+.col-md-1 i
+{
+  position: relative;
+  top: -22px;
+    left: -12px;
+}
+
+.text_crear
+{
+  color:grey;
+  margin-top:10px;
+  display: block;
+}
+
+.text-input--underbar{
+      border-top: 1px solid #ccc !important;
+}
+
+.list__item ul:hover
+{
+  background-color: #ccc;
+}
+
+
+/*EFECTO CARGANDO*/
+
+.sk-three-bounce {
+  margin: 40px auto;
+  width: 80px;
+  text-align: center;
+  margin-top: 60%; }
+  .sk-three-bounce .sk-child {
+    width: 20px;
+    height: 20px;
+    background-color: #0054A5;
+    border-radius: 100%;
+    display: inline-block;
+    -webkit-animation: sk-three-bounce 1.4s ease-in-out 0s infinite both;
+            animation: sk-three-bounce 1.4s ease-in-out 0s infinite both; }
+  .sk-three-bounce .sk-bounce1 {
+    -webkit-animation-delay: -0.32s;
+            animation-delay: -0.32s; }
+  .sk-three-bounce .sk-bounce2 {
+    -webkit-animation-delay: -0.16s;
+            animation-delay: -0.16s; }
+
+@-webkit-keyframes sk-three-bounce {
+  0%, 80%, 100% {
+    -webkit-transform: scale(0);
+            transform: scale(0); }
+  40% {
+    -webkit-transform: scale(1);
+            transform: scale(1); } }
+
+@keyframes sk-three-bounce {
+  0%, 80%, 100% {
+    -webkit-transform: scale(0);
+            transform: scale(0); }
+  40% {
+    -webkit-transform: scale(1);
+            transform: scale(1); } }
+
+  
+.list__item span,.emergencias_actividades ul .columna1
+{
+  font-size:20px;
+}
