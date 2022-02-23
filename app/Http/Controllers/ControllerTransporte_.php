@@ -6,11 +6,15 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 
+use Illuminate\Support\Collection;
+
 use Redirect;//para redirigir pagina
 use DB;//para usar BD
 use Session;//Para las sesiones
 use Carbon\Carbon;
 use Response;
+use SoapClient;
+use GuzzleHttp\Client;
 
 
 
@@ -20,7 +24,7 @@ class ControllerTransporte extends Controller
     /*************************************************/
     /******** FUNCIONES DEL CONTROLADOR **************/
 
-    //Función contructor
+    //Función contructor 
     function __construct() {
 
         //Session::put('user_login',"U00190"); //Oscar
@@ -199,6 +203,7 @@ class ControllerTransporte extends Controller
         $propietarios =
                 DB::connection('sqlsrvCxParque')
                     ->table('tra_propietarios')
+                    ->where('id_estado','A')
                     ->orderBy('nombre')
                     ->lists('nombre','id_propietario');/*option , value*/
 
@@ -235,9 +240,18 @@ class ControllerTransporte extends Controller
                 ->lists('nombre','id');/*option , value*/
 
 
+        $servicios = DB::connection('sqlsrvCxParque')
+        ->table('tra_servicios')
+        ->get();
+        
+        $contratos = DB::connection('sqlsrvCxParque')
+        ->table('tra_contratos_cab')
+        ->get();
+
         return view ('proyectos.transporte.index',
             array(
                 "ciudades"=>$ciudades,
+                "servicios"=>$servicios,
                 "tipoVehiculos"=>$tipoVehiculos,
                 "marcas"=>$marcas,
                 "tipoCombustibles"=>$tipoCombustibles,
@@ -251,7 +265,8 @@ class ControllerTransporte extends Controller
                 "acceso" => $permisoIncidencia[0]->nivel_acceso,
                 "permisoFecha" => $permisoModificarFechas,
                 "permisoModificacionInfoVehiculo" => $permisoModificacionInfoVehiculo,
-                "tipo_cam" => $tipoCAM 
+                "tipo_cam" => $tipoCAM,
+                "contratos"=>$contratos
             )
         );
     }
@@ -303,13 +318,13 @@ class ControllerTransporte extends Controller
             
             //obtenemos el nombre del archivo
             $nombre = "Transporte_" . $this->fechaShort .   "_" . substr(md5(uniqid(rand())), 0, 5) . ".jpg";
-            self::envioArchivos(\File::get($file),$nombre,"/anexos_apa/documentosvehiculos");
-            $nombre = "/anexos_apa/documentosvehiculos/" . $nombre;
+            // self::envioArchivos(\File::get($file),$nombre,"/anexos_apa/documentosvehiculos");
+            // $nombre = "/anexos_apa/documentosvehiculos/" . $nombre;
             
             //indicamos que queremos guardar un nuevo archivo en el date(format)isco local
             //\Storage::disk('local')->put($nombre,  \File::get($file));
             //storage_path()    
-        }
+        }else{ $file=''; $nombre=""; }
         
         if(isset($request->all()['fil_img_2']))
         {
@@ -320,12 +335,12 @@ class ControllerTransporte extends Controller
             //obtenemos el nombre del archivo
             $nombre1 =  "Transporte_" . $this->fechaShort .   "_" . substr(md5(uniqid(rand())), 0, 5) . ".png";
 
-            self::envioArchivos(\File::get($file2),$nombre1,"/anexos_apa/documentosvehiculos"); 
-            $nombre1 = "/anexos_apa/documentosvehiculos/" . $nombre1;
+            // self::envioArchivos(\File::get($file2),$nombre1,"/anexos_apa/documentosvehiculos"); 
+            // $nombre1 = "/anexos_apa/documentosvehiculos/" . $nombre1;
 
             //indicamos que queremos guardar un nuevo archivo en el disco local
             //\Storage::disk('local')->put($nombre1,  \File::get($file2));  
-        }
+        }else{ $file2=''; $nombre2=""; }
 
         if(isset($request->all()['fil_img_3']))
         {
@@ -337,11 +352,11 @@ class ControllerTransporte extends Controller
             $nombre2 =  "Transporte_" . $this->fechaShort .   "_" . substr(md5(uniqid(rand())), 0, 5) . ".png";
             //indicamos que queremos guardar un nuevo archivo en el disco local
             
-            self::envioArchivos(\File::get($file3),$nombre2,"/anexos_apa/documentosvehiculos");
-            $nombre2 = "/anexos_apa/documentosvehiculos/" . $nombre2;
+            // self::envioArchivos(\File::get($file3),$nombre2,"/anexos_apa/documentosvehiculos");
+            // $nombre2 = "/anexos_apa/documentosvehiculos/" . $nombre2;
 
             //\Storage::disk('local')->put($nombre2,  \File::get($file3));
-        }
+        }else{ $file3=''; $nombre3=""; }
 
         if(isset($request->all()['fil_img_4']))
         {
@@ -353,10 +368,88 @@ class ControllerTransporte extends Controller
             $nombre3 =  "Transporte_" . $this->fechaShort .   "_" . substr(md5(uniqid(rand())), 0, 5) . ".png";
             //indicamos que queremos guardar un nuevo archivo en el disco local
             //\Storage::disk('local')->put($nombre3,  \File::get($file4));
-            self::envioArchivos(\File::get($file4),$nombre3,"/anexos_apa/documentosvehiculos");
-            $nombre3 = "/anexos_apa/documentosvehiculos/" . $nombre3;
+            // self::envioArchivos(\File::get($file4),$nombre3,"/anexos_apa/documentosvehiculos");
+            // $nombre3 = "/anexos_apa/documentosvehiculos/" . $nombre3;
 
-        }
+        }else{ $file4=''; $nombre4=""; }
+
+        if ( $file != '' || $file2 != '' || $file3 != '' || $file4 != '') {
+
+            if($file!=""){
+                $filePath = $file->getPathName();
+            }else{ $filePath = ""; }
+            if($file2!=""){
+                $filePath2 = $file2->getPathName();
+            }else{ $filePath2 = ""; }
+            if($file3!=""){
+                $filePath3 = $file3->getPathName();
+            }else{ $filePath3 = ""; }
+            if($file4!=""){
+                $filePath4 = $file4->getPathName();
+            }else{ $filePath4 = ""; }
+
+            //curl_setopt($ch, CURLOPT_HTTPHEADER, false);
+            if(function_exists('curl_file_create')){
+                if($file!=""){
+                    $filePath = curl_file_create($filePath);
+                }
+                if($file2!=""){
+                    $filePath2 = curl_file_create($filePath2);
+                }
+                if($file3!=""){
+                    $filePath3 = curl_file_create($filePath3);
+                }
+                if($file4!=""){
+                    $filePath4 = curl_file_create($filePath4);
+                }
+
+            } else{
+
+                if($file!=""){
+                    $filePath = '@' . realpath($filePath);
+                }
+                if($file2!=""){
+                    $filePath2 = '@' . realpath($filePath2);
+                }
+                if($file3!=""){
+                    $filePath3 = '@' . realpath($filePath3);
+                }
+                if($file4!=""){
+                    $filePath4 = '@' . realpath($filePath4);
+                }  
+             
+            }
+        }else{
+            return("No hay documentos que subir");
+            $filePath = '';
+            $tipo[1] = '';
+        } 
+
+            //$url = 'http://localhost:8096/archivos/transportes/fotoFichaTecnica';
+            //$url = 'http://127.0.0.1:8000/archivos/transportes/guardarDoc';
+            $url = 'http://172.20.50.6/anexos/public/archivos/transportes/fotoFichaTecnica';
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $postFields = array(
+                'doc' => $filePath,
+                'doc2' => $filePath2,
+                'doc3' => $filePath3,
+                'doc4' => $filePath4,
+                'nombre' => $nombre,
+                'nombre2' => $nombre1,
+                'nombre3' => $nombre2,
+                'nombre4' => $nombre3
+            );
+           // dd($postFields);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+            $result = curl_exec($ch);
+            //print_r($result);
+            if(curl_errno($ch)){
+                throw new Exception(curl_error($ch));
+            }
+
         if(count($galeria) == 0) //Primer conductor
         {
             DB::connection('sqlsrvCxParque')
@@ -373,16 +466,43 @@ class ControllerTransporte extends Controller
                 ));
         }else
         {
-            DB::connection('sqlsrvCxParque')
-            ->table('tra_vehiculo_galeria')
-            ->where('placa',$placa)
-            ->update(
-                array(
-                    'ruta_imagen1' => $nombre,
-                    'ruta_imagen2' => $nombre1,
-                    'ruta_imagen3' => $nombre2,
-                    'ruta_imagen4' => $nombre3
-                ));
+            if($file!=""){
+                DB::connection('sqlsrvCxParque')
+                ->table('tra_vehiculo_galeria')
+                ->where('placa',$placa)
+                ->update(
+                    array(
+                        'ruta_imagen1' => $nombre
+                    ));   
+            }
+
+            if($file2!=""){
+                DB::connection('sqlsrvCxParque')
+                ->table('tra_vehiculo_galeria')
+                ->where('placa',$placa)
+                ->update(
+                    array(
+                        'ruta_imagen2' => $nombre1
+                    ));   
+            }
+            if($file3!=""){
+                DB::connection('sqlsrvCxParque')
+                ->table('tra_vehiculo_galeria')
+                ->where('placa',$placa)
+                ->update(
+                    array(
+                        'ruta_imagen3' => $nombre2
+                    ));   
+            }
+            if($file4!=""){
+                DB::connection('sqlsrvCxParque')
+                ->table('tra_vehiculo_galeria')
+                ->where('placa',$placa)
+                ->update(
+                    array(
+                        'ruta_imagen4' => $nombre3
+                    ));   
+            }
         }
         Session::flash('dataExcel1',"Se han cargado correctamente las fotografías del vehículo.");
         Session::flash('imagen_guardada',$placa);
@@ -416,8 +536,9 @@ class ControllerTransporte extends Controller
                 ->leftjoin('tra_contratantes as tbl11','tbl11.id','=','tbl1.id_proyecto')
                 ->leftJoin('CAMPRO.dbo.rh_personas as usua','usua.identificacion','=','tbl1.usuario_ultima_mod')
                 ->leftJoin('tra_tiposvehiculo_cam as tipocam','tipocam.id','=','tbl1.id_tipo_vehiculo_cam')
+                ->leftJoin('tra_contratos_cab as contrato','contrato.numero_contrato','=','tbl1.numero_contrato_vehiculo')
 
-                ->select('tbl1.placa','tbl1.id_ciudad','tbl1.id_tipo_vehiculo','tbl1.id_marca','tbl1.modelo','tbl1.color','tbl1.pasajeros'
+                ->select('tbl1.placa', 'tbl1.elemento_pep', 'tbl1.numero_activo_fijo', 'tbl1.responsable',  'tbl1.centro_logistico','tbl1.id_ciudad','tbl1.id_tipo_vehiculo','tbl1.id_marca','tbl1.modelo','tbl1.color','tbl1.pasajeros'
                     ,'tbl1.linea','tbl1.cilindraje','tbl1.id_tipo_combustible','tbl1.id_transmision','tbl1.id_tipo_vinculo','tbl1.id_clase','tbl1.id_estado','tbl1.chasis'
                     ,'tbl1.motor','tbl1.gps','tbl1.propietario_gps','tbl1.id_proveedor_monitoreo','tbl1.serie_gps'
                     ,'tbl1.valor_contrato','tbl1.capacete','tbl1.portaescaleras','tbl1.caja_herramientas','tbl1.portapertiga'
@@ -427,6 +548,8 @@ class ControllerTransporte extends Controller
                     'tbl7.nombre as nombreCombus','tbl8.nombre as nombreTran','tbl9.nombre as nombreV',
                     'tbl10.nombre as nombreEstado','tbl11.nombre as nombreCon', 'tbl11.ceco as nombrececo',DB::raw("(usua.nombres + ' ' + usua.apellidos) as usua_mod"),'fecha_ultima_mod','tbl5.nombre_cam as nombreTCAM',
                     'tipocam.nombre as nombreTipoCAM',
+                     'contrato.numero_contrato as numero_contrato',
+                    'contrato.fin_validez as fin_validez',
                         DB::raw(
                             "(select top(1)  cambios.fecha
                             FROM tra_log as cambios
@@ -592,6 +715,7 @@ class ControllerTransporte extends Controller
     //Consulta los documentos de un vehículo en específico
     public function documentoVehiculo($placa = "")
     {
+
         if($placa == "")
             return Redirect::to('/transversal/transporte/home');
 
@@ -606,7 +730,7 @@ class ControllerTransporte extends Controller
 
         if($permisoIncidencia[0]->nivel_acceso == "N")
             return view('errors.nopermiso');    
-/////////////////
+
         
         $permisoArchivo= self::consultaAcceso('OP119');
         $CargarArchivo = $permisoArchivo[0]->nivel_acceso ;
@@ -619,16 +743,21 @@ class ControllerTransporte extends Controller
         $documentosV =
             DB::connection('sqlsrvCxParque')
                 ->table('tra_maestro_documentos as tbl1')
-                ->join('tra_maestro_clase_documentos as tbl3','tbl1.id_documento','=','tbl3.id_documento')
-                ->join('tra_maestro as tbl4',DB::raw("concat(tbl4.id_clase,tbl4.id_tipo_vehiculo_cam)"),'=','tbl3.id_clase')
                 ->join('tra_documento_vehiculo as tbl2','tbl1.id_documento','=','tbl2.id_documento')
+                ->join('tra_maestro as tbl4','tbl4.placa','=','tbl2.placa')
                 ->where('tbl4.placa',$placa)
                 ->where('tbl2.placa',$placa)
                 ->where('tbl2.actual','S')
-                ->select('tbl1.id_documento','referencia','entidad','vencimiento','direccion_archivo','tbl1.vence')
+                ->select('tbl1.id_documento',
+                            'referencia',
+                            'entidad','vencimiento','direccion_archivo','tbl1.vence',
+                            DB::raw("concat((
+                                case when tbl2.fecha_servidor < '2020-12-09' OR tbl2.fecha_servidor is null then (select rutas_anexos.url_visualizacion from rutas_anexos where rutas_anexos.tipo_operacion = 'DOCANT')
+                                else (select rutas_anexos.url_visualizacion from rutas_anexos where rutas_anexos.tipo_operacion = 'DOC') end), nombre_archivo) as direccion")
+                        )
                 ->orderBy('tbl1.nombre_documento')
                 ->get();
-                // dd($documentosV);
+
 
         $claseVeh = DB::connection('sqlsrvCxParque')
                 ->table('tra_maestro as tbl1')
@@ -646,7 +775,6 @@ class ControllerTransporte extends Controller
                 ->where('tbl3.id_clase',$claseVeh)
                 ->select('tbl1.id_documento','nombre_documento')
                 ->get();
-
         $clase =
             DB::connection('sqlsrvCxParque')
                 ->table('tra_maestro as tbl4')
@@ -655,7 +783,6 @@ class ControllerTransporte extends Controller
                 ->where('tbl4.placa',$placa)
                 ->select('tbl1.nombre')
                 ->get()[0]->nombre;
-
 
         $vehiculoData = DB::connection('sqlsrvCxParque')
                 ->Table('tra_maestro as tbl1')
@@ -695,11 +822,13 @@ class ControllerTransporte extends Controller
 
     /** Insertar Documentos Vehículo**/
     public function insertaDocVehi(Request $request)
-    {
+    {        
         $placa = $request->all()["placa"];
         $id = $request->all()["id_doc"];
         $opc = $request->all()["opc_doc"];
         $fec = null;
+        $nombre_anexo = '';
+        $nombre1 = '';
 
         if(isset($request->all()["txtFechaVen"]))
         {
@@ -721,57 +850,77 @@ class ControllerTransporte extends Controller
             $mime = $file->getMimeType();
             //obtenemos el nombre del archivo
             $nombre = $file->getClientOriginalName();
-
-            $findme   = 'png';
-            $pos = strpos($mime, $findme);
-
-            if ($pos !== false)
-                $ruta = "Transporte_Documentos_" . $this->fechaShort .   "_" . substr(md5(uniqid(rand())), 0, 8) . ".png";
-
-
-            $findme   = 'jpge';
-            $pos = strpos($mime, $findme);
-            
-            if ($pos !== false)
-                $ruta = "Transporte_Documentos_" . $this->fechaShort .   "_" . substr(md5(uniqid(rand())), 0, 8) . ".jpge";
-
-            $findme   = 'jpeg';
-            $pos = strpos($mime, $findme);
-            
-            if ($pos !== false)
-                $ruta = "Transporte_Documentos_" . $this->fechaShort .   "_" . substr(md5(uniqid(rand())), 0, 8) . ".jpeg";
-
-
-            $findme   = 'jpg';
-            $pos = strpos($mime, $findme);
-            
-            if ($pos !== false)
-                $ruta = "Transporte_Documentos_" . $this->fechaShort .   "_" . substr(md5(uniqid(rand())), 0, 8) . ".jpg";
-
-
-            $findme   = 'pdf';
-            $pos = strpos($mime, $findme);
-
-            if ($pos !== false)
-                $ruta = "Transporte_Documentos_" . $this->fechaShort .   "_" . substr(md5(uniqid(rand())), 0, 8) . ".pdf";
-
-            $findme   = 'xmls';
-            $pos = strpos($mime, $findme);
-
-            if ($pos !== false)
-                $ruta = "Transporte_Documentos_" . $this->fechaShort .   "_" . substr(md5(uniqid(rand())), 0, 8) . ".xmls";
-
-            $findme   = 'xml';
-            $pos = strpos($mime, $findme);
-
-            if ($pos !== false)
-                $ruta = "Transporte_Documentos_" . $this->fechaShort .   "_" . substr(md5(uniqid(rand())), 0, 8) . ".xml";
-
+            $type = $file->getClientmimeType();
+            $tipo = explode("/", $type);
+            $ruta = "Transporte_Documentos_" . $this->fechaShort .   "_" . substr(md5(uniqid(rand())), 0, 8) . ".".$tipo[1];
             $nombre = $ruta;
-            self::envioArchivos(\File::get($file),$nombre,"/anexos_apa/documentosvehiculos");
-            $nombre = "/anexos_apa/documentosvehiculos/" . $nombre;
+            //self::envioArchivos(\File::get($file),$nombre,"/anexos_apa/documentosvehiculos");
+            //$nombre = "/anexos_apa/documentosvehiculos/" . $nombre;
+            $nombre1 = $nombre;
 
-            $ruta = $nombre;
+            $opc = $request->all()["opc_doc"];
+            $placa = $request->all()["placa"];
+            $id = $request->all()["id_doc"];
+
+            if (isset($file) && $file != '') {
+                $size = $file->getClientSize();
+                if($tipo[1] != 'png' && $tipo[1] != 'PNG' && $tipo[1] != 'JPG' && $tipo[1] != 'jpg' && $tipo[1] != 'JPEG' && $tipo[1] != 'jpeg'   && $tipo[1] != 'pdf' && $tipo[1] != 'PDF' ){
+                    return 'error de archivo, Formato no admitido';
+                    die();
+                }
+
+                $uploadFieldName = $file->getClientOriginalName();
+                $filePath = $file->getPathName();
+                //curl_setopt($ch, CURLOPT_HTTPHEADER, false);
+                if(function_exists('curl_file_create')){
+                    $filePath = curl_file_create($filePath);
+                } else{
+                    $filePath = '@' . realpath($filePath);
+                    //curl_setopt($ch, CURLOPT_SAFE_UPLOAD, false);
+                }
+
+            }else{
+                $filePath = '';
+                $tipo[1] = '';
+            } 
+                //$url = 'http://localhost:8096/archivos/transportes/guardarDoc';
+                //$url = 'http://127.0.0.1:8000/archivos/transportes/guardarDoc';
+                $url = 'http://172.20.50.6/anexos/public/archivos/transportes/guardarDoc';
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $url);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                $postFields = array(
+                    'tipo' => $tipo[1],
+                    'doc' => $filePath,
+                    'opc' => $opc,
+                    'id' => $id,
+                    'placa' => $placa,
+                    'nombre' => $nombre
+                );
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+                $result = curl_exec($ch);
+                if(curl_errno($ch)){
+                    throw new Exception(curl_error($ch));
+                }
+                print_r($result);
+                //curl_close($ch);
+                /*$nombre1 = $nombre.'.'.$tipo[1];
+                $client = new \GuzzleHttp\Client(); 
+                $response = $client->request('POST', $url, [
+                                'multipart'  =>  [
+                                    [
+                                        'name'      =>  'doc', 
+                                        'contents'  =>  fopen($file->getPathName(), 'r'),
+                                        'filename'  =>  $nombre1
+                                    ]
+                                ]
+                            ]);*/
+                //dd($response->getBody());
+                //die();
+                //$nombre_anexo = $response;
+                $ruta = $nombre;
+                //die();
         }
         
         $nobreDOc = DB::connection('sqlsrvCxParque')
@@ -800,6 +949,7 @@ class ControllerTransporte extends Controller
                         'entidad' => $nombE,
                         'vencimiento' => $fec,
                         'direccion_archivo' => $ruta,
+                        'nombre_archivo' => $nombre1,
                         'fecha_servidor' => $this->fechaALong,
                         'actual' => 'S'
                         )
@@ -807,7 +957,7 @@ class ControllerTransporte extends Controller
 
                 self::saveLog('OPERA25',$placa,'Ingreso primera vez información documento:' . $nobreDOc . " Referencia: " .$ref);
 
-            }else //Update Datos
+            }else //Update Datosddd
             {  /*
                 if($nombre == "")
                     DB::connection('sqlsrvCxParque')
@@ -848,6 +998,7 @@ class ControllerTransporte extends Controller
                         'entidad' => $nombE,
                         'vencimiento' => $fec,
                         'direccion_archivo' => $ruta,
+                        'nombre_archivo' => $nombre1,
                         'fecha_servidor' => $this->fechaALong,
                         'actual' => 'S'
                         )
@@ -881,6 +1032,7 @@ class ControllerTransporte extends Controller
                         'entidad' => $nombE,
                         'vencimiento' => $fec,
                         'direccion_archivo' => $ruta,
+                        'nombre_archivo' => $nombre1,
                         'fecha_servidor' => $this->fechaALong,
                         'actual' => 'S'
                         )
@@ -888,6 +1040,8 @@ class ControllerTransporte extends Controller
         }
         Session::flash('dataExcel1',"Se ha cargado correctamente la información del documento del vehículo.");
         return Redirect::to("/transversal/documento/$placa");
+ 
+
     }
 
     //Descarga un documentos del vehiculo seleccionado
@@ -991,6 +1145,8 @@ class ControllerTransporte extends Controller
                 ->lists('nombre_documento','id_documento');/*option , value*/
 
         $documentosVencidos = [];
+        $fotoPDF = '';
+
         if(Session::has('fecha_inicio_f'))
         {
             $fecha1 = explode("/",Session::get('fecha_inicio_f'))[2] . "-" . explode("/",Session::get('fecha_inicio_f'))[1] . "-" . explode("/",Session::get('fecha_inicio_f'))[0];
@@ -1000,6 +1156,7 @@ class ControllerTransporte extends Controller
                             ->table('tra_documento_vehiculo as tbl1')
                             ->join('tra_maestro_documentos as tbl2','tbl1.id_documento','=','tbl2.id_documento')
                             ->join('tra_maestro as tbl3','tbl3.placa','=','tbl1.placa')
+                            ->join('rutas_anexos','rutas_anexos.tipo_operacion','=', DB::raw("'DOC'"))
                             ->join('tra_estados as tbl4','tbl4.id_estado','=','tbl3.id_estado')
                             ->join('tra_tipo_clase as tbl5','tbl5.id_tipo_clase','=','tbl3.id_clase')
                             ->join('tra_tipo_vehiculo as tbl6','tbl6.id_tipo_vehiculo','=','tbl3.id_tipo_vehiculo')
@@ -1007,7 +1164,10 @@ class ControllerTransporte extends Controller
                             ->whereBetween('tbl1.vencimiento',[$fecha1 . " 00:00:00",$fecha2 . " 23:59:59"])
                             ->where('tbl1.actual','S')
                             ->where('tbl2.vence','S')
-                            ->select('tbl1.id_documento','tbl1.placa','tbl1.referencia','tbl1.entidad',
+                            ->select(DB::raw("concat((case when tbl1.fecha_servidor is null or tbl1.fecha_servidor < rutas_anexos.fecha_corte then 
+                            (select rutas_anexos.url_visualizacion from rutas_anexos where rutas_anexos.tipo_operacion = 'DOCANT') 
+                            else (select rutas_anexos.url_visualizacion from rutas_anexos where rutas_anexos.tipo_operacion = 'DOC') end), 
+                            nombre_archivo) as direccion"),'tbl1.id_documento','tbl1.placa','tbl1.referencia','tbl1.entidad',
                                 'tbl1.vencimiento','tbl1.direccion_archivo','tbl2.nombre_documento',
                                 'tbl3.id_estado','tbl4.nombre as nombreEstado','tbl5.nombre as nombreClase',
                                 'tbl6.nombre as nombreT','modelo','cilindraje','tbl7.nombre as pry','tbl6.nombre_cam as nombreTCAM');
@@ -1034,6 +1194,7 @@ class ControllerTransporte extends Controller
             'fecha2' => $nuevafecha,
             'tipo_v' => $tipoVehiculos,
             'estados' => $estados,
+            'pdf' => $fotoPDF,
             'proyecto' => $proyecto,
             'propietarios' => $propietarios,
             'vehiculoData' => $documentosVencidos,
@@ -1503,12 +1664,12 @@ class ControllerTransporte extends Controller
 
     //Inserta el primer mantenimiento del vehículo
     public function insertMantenimientoPrimero(Request $request)
-    {
+    {   
         $placa = $request->all()["placa"];
         $fecha1 = explode("/",$request->all()["txtFechaUltimoMante"])[2] . "-" . explode("/",$request->all()["txtFechaUltimoMante"])[1] . "-" . explode("/",$request->all()["txtFechaUltimoMante"])[0];
         $kilome = $request->all()["txtKilometraje"];
         $observacione = $request->all()["txtObservacionPrimerM"];
-        $fecha2 = explode("/",$request->all()["txtFechaProximoMantenimiento"])[2] . "-" . explode("/",$request->all()["txtFechaProximoMantenimiento"])[1] . "-" . explode("/",$request->all()["txtFechaProximoMantenimiento"])[0]; 
+        // $fecha2 = explode("/",$request->all()["txtFechaProximoMantenimiento"])[2] . "-" . explode("/",$request->all()["txtFechaProximoMantenimiento"])[1] . "-" . explode("/",$request->all()["txtFechaProximoMantenimiento"])[0]; 
         
        /* var_dump($placa);
         //obtenemos el campo file definido en el formulario
@@ -1532,11 +1693,38 @@ class ControllerTransporte extends Controller
                                 'fecha_ultimo_mantenimiento' => $fecha1,
                                 'kilometraje' => $kilome,
                                 'observacion' => $observacione,
-                                'fecha_proximo_mantenimiento' => $fecha2,
+                                // 'fecha_proximo_mantenimiento' => $fecha2,
                                 'adjunto_ruta' => $ruta,
                                 )
                         ));
-
+        $inc = self::generaConsecutivo("ID_INCIDENCIA");
+        $rutina = DB::connection('sqlsrvCxParque')
+            ->table('tra_maestro')
+            ->select('rutina_km')
+            ->where('placa',$placa)
+            ->first();  
+        $km_proximo = (int)$kilome+(int)$rutina->rutina_km;
+        $fecha_actual = date("Y-m-d H:i:s");
+        $usuario =Session::get('user_login');
+        DB::connection('sqlsrvCxParque')
+                    ->table('tra_incidencia')
+                    ->insert(
+                        array(
+                            array(
+                                'incidencia'=>$inc,
+                                'tipo_incidencia'=>353,
+                                'fecha_servidor'=>$fecha_actual,
+                                'observacion' => $observacione,
+                                'placa' => $placa,
+                                'fecha_asignacion'=>$fecha_actual,
+                                'id_estado'=>'E06',
+                                'usuario_crea'=>$usuario,
+                                'km'=>$kilome,
+                                'km_proximo'=>$km_proximo,
+                                'fecha_cierre'=>$fecha1,
+                                'usuario_cierre'=>$usuario
+                                )
+                        ));
         DB::connection('sqlsrvCxParque')
             ->table('tra_maestro')
             ->where('placa',$placa)
@@ -1544,8 +1732,6 @@ class ControllerTransporte extends Controller
                 array(
                     'primer_mantenimiento' => 1
                 ));
-
-
         Session::flash('dataExcel1',"Se ha registrado correctamente el primer mantenimiento del vehículo $placa");
         Session::flash('imagen_guardada',$placa);
         return Redirect::to('/transversal/transporte/home');   
@@ -1583,13 +1769,12 @@ class ControllerTransporte extends Controller
                     'tbl10.nombre as nombreEstado')
                 ->get()[0];
 
-
             $cad = "EXEC sp_tra_consulta_incidencia_vehiculo '$placa'";
 
             $incidencias = DB::connection('sqlsrvCxParque')
                 ->select("SET NOCOUNT ON;" . $cad);
 
-            //dd($incidencias);
+            // dd($incidencias);
         }
         
 
@@ -1900,14 +2085,25 @@ class ControllerTransporte extends Controller
         $incidencia = DB::connection('sqlsrvCxParque')
                         ->select("SET NOCOUNT ON;" . $cad)[0];
 
-        $adjuntoInci =DB::connection('sqlsrvCxParque')
+        /*$adjuntoInci =DB::connection('sqlsrvCxParque')
                         ->table('tra_incidencia_anexos')
                         ->where('incidencia',$inci)
                         ->where('tipo',"T01")
                         ->orderBy('fecha_servidor')
                         ->select('ruta')
+                        ->get();*/
+        $adjuntoInci =DB::connection('sqlsrvCxParque')
+                        ->table('tra_incidencia_anexos')
+                        ->where('incidencia',$inci)
+                        ->where('tipo',"T01")
+                        ->join('rutas_anexos as ane', 'ane.tipo_operacion', '=', DB::raw(" 'INC'"))
+                        ->orderBy('fecha_servidor')
+                        ->select('ruta',DB::raw("concat((case when fecha_servidor < ane.fecha_corte 
+                        then (select url_visualizacion from rutas_anexos where rutas_anexos.tipo_operacion = 'INCANT') 
+                        else (select url_visualizacion from rutas_anexos where rutas_anexos.tipo_operacion = 'INC') end), 
+                        nombre_archivo) as direccion"))
                         ->get();
-
+        //dd($adjuntoInci);
         $fotosCon =DB::connection('sqlsrvCxParque')
                 ->table('tra_incidencia_anexos')
                 ->where('incidencia',$inci)
@@ -1955,6 +2151,12 @@ class ControllerTransporte extends Controller
 
         $maestro_parque_item  = DB::connection('sqlsrvCxParque')->table('tra_maestro')->where('placa', $incidencia->placa)->get()[0];
         $talleres_parque      = DB::connection('sqlsrvCxParque')->table('tra_talleres_gps')->orderBy('nombre_proveedor', 'asc')->get();
+        $rutinas              = DB::connection('sqlsrvCxParque')->table('tra_rutinas')->get();
+        $rutinaM              = DB::connection('sqlsrvCxParque')->table('tra_detalle_rutina')->get();
+        $resultadoRutina      = DB::connection('sqlsrvCxParque')->table('tra_resultado_rutinas as res')
+        ->select('res.*','det.*')
+        ->join('tra_detalle_rutina as det','det.id_detalle',"=",'res.id_detalle')
+        ->where('res.incidencia',$inci)->get();
 
         // ==============================================================================================
         // Se envian los datos a la vista
@@ -1976,7 +2178,10 @@ class ControllerTransporte extends Controller
 
                 'permiso_w_cerrar_incidencia' => $permiso_w_cerrar_incidencia,
                 'maestro_parque_item'         => $maestro_parque_item,
-                'talleres_parque'             => $talleres_parque
+                'talleres_parque'             => $talleres_parque,
+                'rutinas'                     => $rutinas,
+                'rutinaM'                     => $rutinaM,
+                'resultadoRutina'             => $resultadoRutina
             ));
     }
 
@@ -1994,6 +2199,22 @@ class ControllerTransporte extends Controller
       $km_actual          = $request->all()['km_actual'];
       $km_proximo         = $request->all()['km_proximo'];
       $observaciones      = $request->all()['observaciones'];
+      if(!empty($request->all()['rutinas'])){
+        $rutinas            = $request->all()['rutinas'];
+  
+          foreach ($rutinas as $value) {
+             DB::connection('sqlsrvCxParque')
+              ->table('tra_resultado_rutinas')
+              ->insert(array(
+                  array(
+                      'incidencia' => $numero_incidencia,
+                      'id_detalle' => $value[2],
+                      'resultado'  => $value[0],
+                      'comentario' => $value[1]
+                  )
+              ));
+          }
+        }
 
       // ====================================================================================
       // Se realiza la actualizacion del cierre de la incidencia
@@ -2012,7 +2233,6 @@ class ControllerTransporte extends Controller
                             'fecha_cierre'            => $fecha_finalizacion,
                             'km'                      => $km_actual,
                             'km_proximo'              => $km_proximo,
-
                             'id_estado'              => 'E06',
                             'usuario_cierre'         => Session::get('user_login')
                           )
@@ -2092,35 +2312,71 @@ class ControllerTransporte extends Controller
         
         
     }
+
+    //Funcion para ver el detalle de las rutinas de mantenimiento
+    public function rutinaDetalle(Request $request){
+        $id_rutina = $request->all()["id_rutina"];
+
+        $rutinaDetalle = DB::connection('sqlsrvCxParque')
+        ->table('tra_detalle_rutina')
+        ->where('id_rutina',$id_rutina)
+        ->get();
+        return json_encode($rutinaDetalle);
+    }
     
     //Función encargada de cargar el adjunto de la incidencia
     public function insertAdjuntoInci(Request $request)
     {
         $inci = $request->all()["incidencia"];
         $file = $request->file('file_upload');
-        //Varificamos que carge un .xlsx
+        //Verificamos que carge un .xlsx
         $mime = $file->getMimeType();
-
-
+        $tipo = explode("/", $mime);
+        $url = 'http://172.20.50.6/anexos/public/archivos/transportes/guardarAnexoIncidencia';
+        //$url = 'http://127.0.0.1:8000/archivos/transportes/guardarAnexoIncidencia';
         //obtenemos el nombre del archivo
-        $nombre = "Transporte_" . $this->fechaShort . "_" .  substr(md5(uniqid(rand())), 0, 5) . ".pdf";
-        self::envioArchivos(\File::get($file),$nombre,"/anexos_apa/documentosvehiculos");
-         $nombre  = "/anexos_apa/documentosvehiculos/" . $nombre;
+        //dd($this->fechaShort, $tipo);
+        $nombre = "Transporte_" . $this->fechaShort . "_" .  substr(md5(uniqid(rand())), 0, 5) . ".".$tipo[1];
+        $filePath = $file->getPathName();;
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        //curl_setopt($ch, CURLOPT_HTTPHEADER, 'Content-Type:multipart/form-data');
+        if(function_exists('curl_file_create')){
+            $filePath = curl_file_create($filePath);
+        } else{
+            $filePath = '@' . realpath($filePath);
+            curl_setopt($ch, CURLOPT_SAFE_UPLOAD, false);
+        }
 
+        $postFields = array(
+            'archivo2' => $filePath,
+            'nombre' => $nombre
+        );
+
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+        $result = curl_exec($ch);
+        if(curl_errno($ch)){
+            throw new Exception(curl_error($ch));
+        }
+        //self::envioArchivos(\File::get($file),$nombre,"/anexos_apa/documentosvehiculos");
+        $nombre1  = "/anexos_apa/documentosvehiculos/" . $nombre;
+        //dd($result);
         DB::connection('sqlsrvCxParque')
             ->table('tra_incidencia_anexos')
             ->insert(array(
                 array(
                     'incidencia' => $inci,
-                    'ruta' => $nombre,
+                    'ruta' => $nombre1,
                     'usuario' => Session::get('user_login'),
                     'tipo' => "T01",
+                    'nombre_archivo' => $nombre,
                     'fecha_servidor' => $this->fechaALong
                 )
             ));
 
         Session::flash('dataExcel1',"Se ha cargado correctamente el adjunto de la incidencia");
-
         //var_dump("todo BIEN");
         return Redirect::to("transversal/incidencia/$inci");
     }
@@ -2969,9 +3225,8 @@ class ControllerTransporte extends Controller
 
 
     //Reporte de estado general de los documentos
-    public function indexReporteGeneralDocumentos()
+    public function indexReporteGeneralDocumentos(Request $request)
     {
-
         $tipoVehiculos =
             DB::connection('sqlsrvCxParque')
                 ->table('tra_tipo_vehiculo')
@@ -2990,22 +3245,35 @@ class ControllerTransporte extends Controller
                 ->orderBy('nombre')
                 ->lists('nombre','id');/*option , value*/
 
+        $estado =
+            DB::connection('sqlsrvCxParque')
+                ->table('tra_estados')
+                ->orderBy('nombre')
+                ->lists('nombre','id_estado');/*option , value*/
         $datos = [];
-
-        if(Session::has("selTipoVehiculoDoc"))
-        {
-            $cad = "EXEC sp_tra_consulta_general_documentos '" . Session::get("selTipoVehiculoDoc") . "','" . Session::get("selClaseDoc") . "','" . Session::get("selProyectoClienteDoc") . "'";
+        if($request->all())
+        {   
+            if($request->all()['selEstadoDoc'] != ''){
+                $estados = $request->all()['selEstadoDoc'];
+                $cond_estado = "";
+                for ($i=0; $i <sizeof($estados); $i++){
+                    $cond_estado .= "".$estados[$i].",";
+                }
+                $cond_estado = substr($cond_estado, 0, -1);
+            }
+            $cad = "EXEC sp_tra_consulta_general_documentos '" . $request->all()['selTipoVehiculoDoc'] . "','" . $request->all()['selClaseDoc'] . "','" . $request->all()['selProyectoClienteDoc'] . "','" . $cond_estado. "'";
             $datos = DB::connection('sqlsrvCxParque')
-                   ->select("SET NOCOUNT ON;" . $cad); 
+                    ->select("SET NOCOUNT ON;" . $cad);
         }
-        
         return view('proyectos.transporte.indexReporteGeneralDocumentos',array(
             'tipoM' => $tipoVehiculos,
             'clases' => $clases,
             'proy' => $proyecto,
-            'dat' => $datos 
-            )); 
+            'estado' => $estado,
+            'dat' => $datos
+            ));  
     }
+
 
     //Filter reporte de estado general de los documentos
     public function filtesegdocumentos(Request $request)
@@ -3023,14 +3291,17 @@ class ControllerTransporte extends Controller
             DB::connection('sqlsrvCxParque')
                 ->table('tra_tipo_vehiculo')
                 ->orderBy('nombre')
-                ->lists('nombre','id_tipo_vehiculo');/*option , value*/
+                ->lists('nombre', DB::raw("CONCAT(nombre,'') as id"));/*option , value*/
 
 
         $proyecto =
             DB::connection('sqlsrvCxParque')
                 ->table('tra_contratantes')
+                ->where('ceco','!=','')
                 ->orderBy('nombre')
-                ->lists('nombre','id');/*option , value*/
+                ->lists(DB::raw("CONCAT(ceco,'-',nombre) as nombre"),'id');/*option , value*/
+
+        
 
         $fechaActual = explode("-",$this->fechaShort);
         $fechaActual = $fechaActual[2] . "/" .  $fechaActual[1] . "/" .  $fechaActual[0];
@@ -3041,17 +3312,89 @@ class ControllerTransporte extends Controller
         $nuevafecha = explode("-",$nuevafecha);
         $nuevafecha = $nuevafecha[2] . "/" .  $nuevafecha[1] . "/" .  $nuevafecha[0];
 
-
+        $seleccionRP = "";
         $datos = [];
         
         if(Session::has("selTipoVehiculoProgMant"))
         {
-            /*$cad = "EXEC sp_tra_consulta_programa_mantenimiento '" . Session::get("selTipoVehiculoProgMant") . "','" . Session::get("selProyectoClienteProgMant") . "','" . Session::get("fecha_inicio_prog_man") . "'," . (Session::get("cant_mmto_prog_man") == "" ? 0 :Session::get("cant_mmto_prog_man") )  . ",'" . Session::get("txtPlacaProgMant") . "'";*/
+            // $cad = "EXEC sp_tra_consulta_programa_mantenimiento '" . Session::get("selTipoVehiculoProgMant") . "','" . Session::get("selProyectoClienteProgMant") . "','" . Session::get("fecha_inicio_prog_man") . "'," . (Session::get("cant_mmto_prog_man") == "" ? 0 :Session::get("cant_mmto_prog_man") )  . ",'" . Session::get("txtPlacaProgMant") . "'";
 
-            $cad = "EXEC sp_tra_consulta_programa_mantenimiento '" . Session::get("selTipoVehiculoProgMant") . "','" . Session::get("selProyectoClienteProgMant") . "','" . Session::get("fecha_inicio_prog_man") . "'," . (Session::get("cant_mmto_prog_man") == "" ? 0 :Session::get("cant_mmto_prog_man") );
-
+            // $cad = "EXEC sp_tra_consulta_programa_mantenimiento '" . Session::get("selTipoVehiculoProgMant") . "','" . Session::get("selProyectoClienteProgMant") . "','" . Session::get("fecha_inicio_prog_man") . "'," . (Session::get("cant_mmto_prog_man") == "" ? 0 :Session::get("cant_mmto_prog_man") );
+            $cad = "EXEC sp_tra_consulta_programa_mantenimiento '" . Session::get("selTipoVehiculoProgMant") . "','" . Session::get("selProyectoClienteProgMant") . "','" . Session::get("fecha_inicio_prog_man") . "','" . Session::get("txtPlacaProgMant") . "'";
+            
             $datos = DB::connection('sqlsrvCxParque')
                        ->select("SET NOCOUNT ON;" . $cad); 
+            // $datos[0]->promedio=123;
+            // dd($datos[0]);
+          foreach ($datos as $key => $auto) {
+            if(($auto->fecha_ult_mtto!='' || $auto->fecha_ult_mtto!=null) && ($auto->fecha_km_previo!='' || $auto->fecha_km_previo!=null)){
+                $promedio =
+                        DB::connection('sqlsrvCxParque')
+                            ->table('tra_vehiculo_odometro')
+                            ->where('placa','=',$auto->placa)
+                            ->limit(3)
+                            ->orderBy('id','DESC')
+                            ->get();
+                              
+                        $Cpromedio = Collection::make($promedio);
+                        $Cpromedio->count();
+                        $date1 = date_create($Cpromedio->first()->fecha);
+                        $date2 = date_create($Cpromedio->last()->fecha);
+                        $diff = $date1->diff($date2);
+                        $prom_dias = $diff->days;
+                        if((int)$prom_dias == 0){
+                            $prom_dias = 1;
+                        } 
+                        if($Cpromedio->count()>1){
+                            $pro = (int)(($Cpromedio->first()->kilometraje-$Cpromedio->last()->kilometraje)/(int)$prom_dias);
+                        }else{
+                            $pro = 0;
+                        }
+                        // $auto->km_previo = $Cpromedio->last()->kilometraje;
+                        $datos[$key]->km_faltante = $auto->km_prox_mtto - $auto->ult_km;
+                        $datos[$key]->promedio=$pro;
+                if($auto->km_promedio != '' && $auto->km_promedio != null){
+                        if($pro<$auto->km_promedio){
+                            $diasmas = (int)$datos[$key]->km_faltante/(int)$auto->km_promedio;
+                            $diasmas = (int)$diasmas;
+                            $datos[$key]->dias_proximo = $diasmas;
+                            $fecha_prox_mantenimiento = date("Y-M-d",strtotime($auto->fecha_ult_km."+ $diasmas days"));
+                            $datos[$key]->fecha_proximo_mtto = $fecha_prox_mantenimiento;
+                            $seleccionRP = 'rpf';
+                        }else{
+                            (int)$diasmas = (int)$datos[$key]->km_faltante/(int)$pro;
+                            $diasmas = (int)$diasmas;
+                            $datos[$key]->dias_proximo = $diasmas;
+                            $fecha_prox_mantenimiento = date("Y-M-d",strtotime($auto->fecha_ult_km."+ $diasmas days"));
+                            $datos[$key]->fecha_proximo_mtto = $fecha_prox_mantenimiento;
+                            $seleccionRP = 'rpr';
+                        }
+                }else{
+                    if($auto->recorrido_promedio != '' && $auto->recorrido_promedio != null){
+                        if($pro<$auto->recorrido_promedio){
+                            $diasmas = (int)$datos[$key]->km_faltante/(int)$auto->recorrido_promedio;
+                            $diasmas = (int)$diasmas;
+                            $datos[$key]->dias_proximo = $diasmas;
+                            $fecha_prox_mantenimiento = date("Y-M-d",strtotime($auto->fecha_ult_km."+ $diasmas days"));
+                            $datos[$key]->fecha_proximo_mtto = $fecha_prox_mantenimiento;
+                            $seleccionRP = 'rpt';
+                        }else{
+                            (int)$diasmas = (int)$datos[$key]->km_faltante/(int)$pro;
+                            $diasmas = (int)$diasmas;
+                            $datos[$key]->dias_proximo = $diasmas;
+                            $fecha_prox_mantenimiento = date("Y-M-d",strtotime($auto->fecha_ult_km."+ $diasmas days"));
+                            $datos[$key]->fecha_proximo_mtto = $fecha_prox_mantenimiento;
+                            $seleccionRP = 'rpf';
+                        }
+                }else{$datos[$key]->fecha_proximo_mtto = 0;}
+                    
+                }       
+            }
+            $datos[$key]->seleccionRP = $seleccionRP;
+          }
+           //dd($datos);
+        
+        
         }
         
         
@@ -3060,21 +3403,19 @@ class ControllerTransporte extends Controller
             'tipo_v' => $tipoVehiculos,
             'proyecto' => $proyecto,
             'dat' => $datos,
-            'fecha2' => $nuevafecha
-            )); 
+            'fecha2' => $nuevafecha,
+            ));
     }
 
     //Filtro del reporte de programa de mantenimientos
     public function filterProgramaMantenimiento(Request $request)
-    {
+    {   
         Session::put("selTipoVehiculoProgMant",$request->all()['selTipoVehiculoProgMant']);
         Session::put("selProyectoClienteProgMant",$request->all()['selProyectoClienteProgMant']);
         Session::put("fecha_inicio_prog_man",$request->all()['fecha_inicio_prog_man']);
-        Session::put("cant_mmto_prog_man",$request->all()['cant_mmto_prog_man']);
+        // Session::put("cant_mmto_prog_man",$request->all()['cant_mmto_prog_man']);
         Session::put("txtPlacaProgMant",$request->all()['txtPlacaProgMant']);
 
-
-        
         return Redirect::to('transversal/reportes/programamantenimiento');
     }
 
@@ -3123,7 +3464,6 @@ class ControllerTransporte extends Controller
             //dd($cad);
             $dat = DB::connection('sqlsrvCxParque')
                     ->select("SET NOCOUNT ON;" . $cad);
-
 
         }
         return view('proyectos.transporte.reporteentregaoperacion',array(
@@ -3639,7 +3979,7 @@ class ControllerTransporte extends Controller
          * Modificación: Cuando se crea un nuevo vehículo
          */
         if ($opcion == 4)// Guarda datos del vehiculo
-        {
+        {   
             $matricula = $request->all()["matricula"];
             $ciudad = $request->all()["ciudad"];
             $tipo = $request->all()["tipo"];
@@ -3657,7 +3997,8 @@ class ControllerTransporte extends Controller
             $clase = $request->all()["clase"];
 
             $rutina = $request->all()["rutina"];
-
+            $servicio = $request->all()["servicio"];
+            $contrato = $request->all()["contrato"];
 
             $dbVehi = DB::connection('sqlsrvCxParque')
                     ->table('tra_maestro')
@@ -3689,6 +4030,8 @@ class ControllerTransporte extends Controller
                         "id_propietario" => 1,
                         'fecha_servidor' => $this->fechaALong,
                         'rutina_km' => $rutina,
+                        'numero_servicio' => $servicio,
+                        'numero_contrato_vehiculo' => $contrato,
                         'new_acta_entrega' => 1
                     )
                 ));
@@ -3702,7 +4045,7 @@ class ControllerTransporte extends Controller
                         ->where('placa',$matricula)
                         ->get(['id_ciudad','id_tipo_vehiculo','id_marca','modelo','color','id_estado',
                             'pasajeros','linea','cilindraje','id_tipo_combustible','id_transmision'
-                            ,'id_tipo_vinculo','fecha_vinculo','id_clase'])[0];
+                            ,'id_tipo_vinculo','fecha_vinculo','id_clase','numero_servicio'])[0];
 
                 if($datosA->id_ciudad != $ciudad)
                     self::saveLog('OPERA21',$matricula,'Actuliza ciudad de ' . $datosA->id_ciudad . ' A ' . $ciudad);
@@ -3742,7 +4085,9 @@ class ControllerTransporte extends Controller
 
                 if($datosA->id_clase != $clase)
                     self::saveLog('OPERA21',$matricula,'Actuliza clase de ' . $datosA->id_clase . ' A ' . $clase);
-
+                
+                if($datosA->numero_servicio != $servicio)
+                    self::saveLog('OPERA21',$matricula,'Actuliza numero  de servicio de ' . $datosA->numero_servicio . ' A ' . $servicio);
                 if($estado == "E02")
                 {
                     DB::connection('sqlsrvCxParque')
@@ -3763,7 +4108,10 @@ class ControllerTransporte extends Controller
                                 "id_tipo_vinculo" => $tipoVinculacion,
                                 "fecha_vinculo" => $fecha,
                                 "id_clase" => $clase,
-                                'rutina_km' => $rutina                   
+                                'rutina_km' => $rutina,
+                                'numero_servicio'=>$servicio,
+                                'numero_contrato_vehiculo' => $contrato
+
                         ));
 
                     DB::connection('sqlsrvCxParque')
@@ -3795,7 +4143,10 @@ class ControllerTransporte extends Controller
                                     "id_tipo_vinculo" => $tipoVinculacion,
                                     "fecha_vinculo" => $fecha,
                                     "id_clase" => $clase,   
-                                    'rutina_km' => $rutina                 
+                                    'rutina_km' => $rutina,
+                                    'numero_servicio'=>$servicio,
+                                    'numero_contrato_vehiculo' => $contrato
+
                             ));
 
                         DB::connection('sqlsrvCxParque')
@@ -3824,7 +4175,9 @@ class ControllerTransporte extends Controller
                                     "id_tipo_vinculo" => $tipoVinculacion,
                                     "fecha_vinculo" => $fecha,
                                     "id_clase" => $clase, 
-                                    'rutina_km' => $rutina                   
+                                    'rutina_km' => $rutina,
+                                    'numero_servicio'=>$servicio,                   
+                                    'numero_contrato_vehiculo' => $contrato
                             ));    
                     }
                     
@@ -5055,6 +5408,8 @@ class ControllerTransporte extends Controller
 
         if($opcion == 20) //Save Ingreso Taller Novedad
         {
+        
+               
             //Ingresa novedad
             DB::connection('sqlsrvCxParque')
                     ->table('tra_incidencia_novedad')
@@ -5065,9 +5420,16 @@ class ControllerTransporte extends Controller
                             'observacion' => $request->all()['obser'],
                             'tiempo_estimado' => $request->all()['tiempo'],
                             'id_usuario_ingreso' => Session::get('user_login'),
-                            'costo_ingreso' => $request->all()['costo']
+                            'costo_ingreso' => $request->all()['costo'],
+                             'servicio' => $request->all()['servicio'],
+                             'servicio1' => $request->all()['servicio1'],
+                             'servicio2' => $request->all()['servicio2']
+                           
                             )
                         ));
+
+                    
+             
 
             //Cambio de estado incidencia
             DB::connection('sqlsrvCxParque')
@@ -5652,14 +6014,32 @@ class ControllerTransporte extends Controller
                 ->Table('tra_maestro as tbl1')
                 ->leftJoin('tra_propietarios as tbl2','tbl1.id_propietario','=','tbl2.id_propietario')
                 ->leftJoin('tra_vehiculo_galeria as tbl3','tbl3.placa','=','tbl1.placa')
+                ->join('rutas_anexos','rutas_anexos.tipo_operacion','=', DB::raw("'FOT'"))
                 ->where('tbl1.placa',$placa)
-                ->select('tbl1.ficha_tecnica','tbl1.id_ciudad','tbl1.id_tipo_vehiculo','tbl1.id_marca','tbl1.modelo','tbl1.color','tbl1.pasajeros'
+                ->select('tbl3.ruta_imagen1','tbl3.ruta_imagen2','tbl3.ruta_imagen3','tbl3.ruta_imagen4',
+                    DB::raw("concat((case when tbl3.fecha_servidor is null or tbl3.fecha_servidor < rutas_anexos.fecha_corte then 
+                    (select rutas_anexos.url_visualizacion from rutas_anexos where rutas_anexos.tipo_operacion = 'FOTANT') 
+                    else (select rutas_anexos.url_visualizacion from rutas_anexos where rutas_anexos.tipo_operacion = 'FOT') end), 
+                    tbl3.ruta_imagen1) as direccion1"),
+                    DB::raw("concat((case when tbl3.fecha_servidor is null or tbl3.fecha_servidor < rutas_anexos.fecha_corte then 
+                    (select rutas_anexos.url_visualizacion from rutas_anexos where rutas_anexos.tipo_operacion = 'FOTANT') 
+                    else (select rutas_anexos.url_visualizacion from rutas_anexos where rutas_anexos.tipo_operacion = 'FOT') end), 
+                    tbl3.ruta_imagen2) as direccion2"),
+                    DB::raw("concat((case when tbl3.fecha_servidor is null or tbl3.fecha_servidor < rutas_anexos.fecha_corte then 
+                    (select rutas_anexos.url_visualizacion from rutas_anexos where rutas_anexos.tipo_operacion = 'FOTANT') 
+                    else (select rutas_anexos.url_visualizacion from rutas_anexos where rutas_anexos.tipo_operacion = 'FOT') end), 
+                    tbl3.ruta_imagen3) as direccion3"),
+                    DB::raw("concat((case when tbl3.fecha_servidor is null or tbl3.fecha_servidor < rutas_anexos.fecha_corte then 
+                    (select rutas_anexos.url_visualizacion from rutas_anexos where rutas_anexos.tipo_operacion = 'FOTANT') 
+                    else (select rutas_anexos.url_visualizacion from rutas_anexos where rutas_anexos.tipo_operacion = 'FOT') end), 
+                    tbl3.ruta_imagen4) as direccion4")
+                    ,'tbl1.ficha_tecnica','tbl1.numero_servicio','tbl1.numero_contrato_vehiculo','tbl1.id_ciudad','tbl1.id_tipo_vehiculo','tbl1.id_marca','tbl1.modelo','tbl1.color','tbl1.pasajeros'
                     ,'tbl1.linea','tbl1.cilindraje','tbl1.id_tipo_combustible','tbl1.id_transmision','tbl1.id_tipo_vinculo','tbl1.id_clase','tbl1.id_estado','tbl1.chasis'
                     ,'tbl1.motor','tbl1.gps','tbl1.propietario_gps','tbl1.id_proveedor_monitoreo','tbl1.serie_gps'
                     ,'tbl1.valor_contrato','tbl1.capacete','tbl1.portaescaleras','tbl1.caja_herramientas','tbl1.portapertiga'
-                    ,'tbl1.id_propietario','tbl1.id_proyecto','tbl1.fecha_vinculo as fecha'
-                    ,'tbl2.domicilio','tbl2.cedula','tbl2.telefonoFijo','tbl2.telefonoCel','tbl2.correo','tbl1.primer_mantenimiento',
-                    'tbl3.ruta_imagen1','tbl3.ruta_imagen2','tbl3.ruta_imagen3','tbl3.ruta_imagen4','tbl1.id_tipo_vehiculo_cam','rutina_km as rutina', 'tbl1.km_promedio AS km_promedio')
+                    ,'tbl1.id_propietario','tbl1.id_proyecto','tbl1.fecha_vinculo as fecha','tbl1.responsable'
+                    ,'tbl2.domicilio','tbl2.cedula','tbl2.telefonoFijo','tbl2.telefonoCel','tbl2.correo','tbl1.primer_mantenimiento'
+                    ,'tbl1.id_tipo_vehiculo_cam','rutina_km as rutina', 'tbl1.km_promedio AS km_promedio', 'tbl1.elemento_pep AS pep')
                 ->get();
 
             $conductor = "";
@@ -5691,12 +6071,16 @@ class ControllerTransporte extends Controller
                 ->join('tra_maestro_clase_documentos as tbl3','tbl1.id_documento','=','tbl3.id_documento')
                 ->join('tra_maestro as tbl4','tbl4.id_clase','=','tbl3.id_clase')
                 ->join('tra_documento_vehiculo as tbl2','tbl1.id_documento','=','tbl2.id_documento')
+                ->join('rutas_anexos','rutas_anexos.tipo_operacion','=', DB::raw("'FOT'"))
                 ->where('tbl2.placa',$placa)
                 ->where('tbl4.placa',$placa)
                 ->where('tbl1.id_documento',$doc)
                 ->where('tbl2.actual','N')
                 ->select('tbl1.id_documento','tbl1.nombre_documento','referencia','entidad',
-                    'vencimiento','direccion_archivo')
+                    'vencimiento','direccion_archivo',DB::raw("concat((case when tbl2.fecha_servidor is null or tbl2.fecha_servidor < rutas_anexos.fecha_corte then 
+                    (select rutas_anexos.url_visualizacion from rutas_anexos where rutas_anexos.tipo_operacion = 'DOCANT') 
+                    else (select rutas_anexos.url_visualizacion from rutas_anexos where rutas_anexos.tipo_operacion = 'DOC') end), 
+                    tbl2.nombre_archivo) as direccion1"))
                 ->orderBy('tbl2.fecha_servidor','des')
                 ->get();
 
@@ -5964,19 +6348,30 @@ class ControllerTransporte extends Controller
                     ->get(); 
             }
         }
-
         if($opcion == 12)//Consulta Ingreso a taller
+
         {
+
             $respuesta =
+
                 DB::connection('sqlsrvCxParque')
+
                     ->table('tra_incidencia')
+
                     ->where('tra_incidencia.id_estado','E03')
+
                     ->join('tra_talleres_gps','tra_talleres_gps.id','=','tra_incidencia.taller_asignado')
+
                     ->join('tra_maestro as tbl3','tbl3.placa','=','tra_incidencia.placa')
+
                     ->leftJoin("tra_contratantes",'tra_contratantes.id','=','tbl3.id_proyecto')
+
                     ->select('incidencia', 'tra_incidencia.fecha_servidor','observacion','tra_incidencia.placa','nombre_proveedor',
-                        'tra_incidencia.direccion','tra_contratantes.nombre as nombreP','tiempo_estimado','km')
-                    ->get(); 
+
+                        'tra_incidencia.direccion','tra_contratantes.nombre as nombreP', 'tbl3.elemento_pep as codigo_pep', 'tbl3.centro_logistico','tra_contratantes.grupo_compras','tiempo_estimado','km')
+
+                    ->get();
+
         }
 
         if($opcion == 13)//Consulta Salida de taller
@@ -6235,7 +6630,7 @@ class ControllerTransporte extends Controller
     //Funciones utilizadas por las aplicaciones móviles para realizar la consulta de información
     public function consultaWebServicesMovil(Request $request)
     {
-        // http://104.36.166.72/
+        // http://104.36.166.72:8084/
 
         //Rutas -> consultarmoviltransporte
         
@@ -7818,11 +8213,176 @@ class ControllerTransporte extends Controller
        }
 
        return response()->json($respuesta);
-    }    
+    }
+    public function ExportChevy(){
+        // dd(3);
+        // $this->info("Iniciando consulta");
+        // Create the SoapClient instance 
+        $fechaA = Carbon::now('America/Bogota');
+        $fechaShort = $fechaA->format('Y-m-d');
+
+        ini_set("soap.wsdl_cache_enabled", "0"); // disabling WSDL cache
+        $url         = "https://worldfleetlog.com/WebFleetStationServices/Online.asmx?wsdl";
+        $client     = new SoapClient($url, array("trace" => 1, "exception" => 0));
+        $auth = array(
+            'Username' => 'webservice',
+            'Password'   => '123456',
+            'Company'     => 'cam colombia'
+        );
+
+        $ns = 'http://tempuri.org/'; //Namespace of the WS. 
+        $header = new \SOAPHeader($ns, 'LoginInfo', $auth);
+        $client->__setSoapHeaders($header);
+        $response = $client->GetCarsInfo();
+        $vehiculos = $response->GetCarsInfoResult;
+        $vehiculos = $vehiculos->CarOnlinePosItemInfo;
+        // dd($response);
+        for ($i = 0; $i < count($vehiculos); $i++) {
+            
+            $latitud = $vehiculos[$i]->Vehicle_Latitude;
+            $longitud = $vehiculos[$i]->Vehicle_Longitude;
+            $angulo = $vehiculos[$i]->Vehicle_Angle;
+            $color = $vehiculos[$i]->Vehicle_Color;
+            $placa = $vehiculos[$i]->Vehicle_Label;
+            $date = $vehiculos[$i]->Event_Time;
+            // $this->info($placa);
+
+            $id = DB::table('tp_cuadrillas')
+            ->where('placa', $placa)
+            ->get(['cuadrillas_id']);
+
+            if($placa=='T3000'){
+                dd($id);
+            }
+
+        }
+    }      
 
     /**************FIN WEB SERVICES APLICACIÓN MÓVIL********/
     /*******************************************************/
+    
+    //Api vehiculos
+    public function ApiVehiculosAct()
+    {
+        $respuesta = DB::connection('sqlsrvCxParque')->table('Vehiculos_Activos_API')->get();
+        return Response::json($respuesta);
+    }
 
+    //Api documentos
+    public function ApiDocumentos()
+    {
+        $respuesta = DB::connection('sqlsrvCxParque')->table('ReporteGeneralDoc')->get();
+        return Response::json($respuesta);
+    }
+
+    //Api programa de mantenimientos
+    public function ApiProgramaMantenimientos()
+    {
+        $respuesta = DB::connection('sqlsrvCxParque')->table('Mtto_preventivo')->get();
+        return Response::json($respuesta); 
+    }
+    public function visor2($request)
+    {
+
+        $url = base64_decode($request);
+        
+    
+        //$url = 'http://172.20.50.6/anexos2/RRHH/SELECCION/P000028463_TD288.pdf';
+        $primeras = substr( $url , 0, 28);
+        $primeras1 = substr( $url , 0, 29);
+        $primeras2 = substr( $url , 0, 21);
+        if($primeras1 == 'https://equans.sharepoint.com' or $primeras == 'https://engie.sharepoint.com'){
+            echo '<script> location.href= "'.$url.'"; </script>';
+        }else{
+            $url = str_replace(" ", "%20", $url);
+            $tipo = substr ( $url , -3 );
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER,true);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 100);
+        
+            if ($tipo == 'pdf' or $tipo == 'PDF') {
+                header('Content-type: application/pdf');
+            }elseif($tipo == 'doc'){
+                header('Content-type: application/msword');
+            }elseif($tipo == 'ocx'){
+                header('Content-type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+            }else{
+                header('Content-type: image/jpeg');
+            }
+            
+            $result = curl_exec($ch);
+            curl_close($ch);
+            echo $result;
+            die();
+        }
+    }
+
+    public function visor($request){
+        //dd($request);
+        $url = base64_decode($request);
+        //dd($url);
+        //$url = 'http://172.20.50.6/anexos2/RRHH/SELECCION/P000028463_TD288.pdf';
+        $primeras = substr( $url , 0, 28);
+        $primeras1 = substr( $url , 0, 29);
+        $primeras2 = substr( $url , 0, 21);
+	    if($primeras == 'https://engie.sharepoint.com' or $primeras1 == 'https://equans.sharepoint.com' or $primeras2 == 'http://190.60.248.195'){
+            echo '<script> location.href= "'.$url.'"; </script>';
+        }else{
+            $url = str_replace(" ", "%20", $url);
+            $tipo = substr ( $url , -3 );
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER,true);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 100);
+        
+            if ($tipo == 'pdf' or $tipo == 'PDF') {
+                header('Content-type: application/pdf');
+            }elseif($tipo == 'doc'){
+                header('Content-type: application/msword');
+            }elseif($tipo == 'ocx'){
+                header('Content-type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+            }else{
+                header('Content-type: image/jpeg');
+            }
+            
+            $result = curl_exec($ch);
+            curl_close($ch);
+            echo $result;
+            die();
+        }
+    }
+    public function chevistar(){
+
+        ini_set("soap.wsdl_cache_enabled", "0"); // disabling WSDL cache
+        $url         = "https://worldfleetlog.com/WebFleetStationServices/Online.asmx?wsdl"; 
+        $client     = new SoapClient($url, array("trace" => 1, "exception" => 0)); 
+        $auth = array(
+                    'Username' => 'webservice', 
+                      'Password'   => '123456', 
+                      'Company'     => 'cam colombia'
+                
+            );
+        $ns = 'http://tempuri.org/'; //Namespace of the WS. 
+        try {
+            //Create Soap Header.        
+            $header = new \SOAPHeader($ns, 'LoginInfo', $auth);  
+            $client->__setSoapHeaders($header);
+            $response = $client->GetCarsInfo();
+            $vehiculos = $response->GetCarsInfoResult;
+            $vehiculos = $vehiculos->CarOnlinePosItemInfo;
+
+            return json_encode($vehiculos);
+         
+            //for ($i=0; $i < 1; $i++) { 
+            
+            // CarOnlinePosItemInfo
+        } catch (SoapFault $e) {
+          
+        }
+    }
 }
 
 
